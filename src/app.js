@@ -1,6 +1,8 @@
 import express from 'express'
 import dotenv from 'dotenv'
-import authRoutes from './src/routes/auth.routes.js'
+import authRoutes from './routes/auth.routes.js'
+import taskRoutes  from './routes/tasks.route.js'
+import quoteRoutes from './routes/qoutes.route.js'
 
 dotenv.config()
 
@@ -13,6 +15,8 @@ app.use(express.urlencoded({ extended: true }))
 
 // Routes
 app.use('/api/auth', authRoutes)
+app.use('/api/tasks',  taskRoutes)
+app.use('/api/quotes', quoteRoutes)
 
 // Health check
 app.get('/', (req, res) => {
