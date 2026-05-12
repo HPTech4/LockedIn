@@ -15,28 +15,23 @@ const envOrigins = (process.env.CORS_ORIGIN || '')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
-const localhostOrigins = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173'
-]
+const defaultLocal = 'http://localhost:5173'
 
-const allowedOrigins = [...new Set([...envOrigins, ...localhostOrigins])]
+// Use CORS_ORIGIN if provided, otherwise only allow the default local frontend
+const allowedOrigins = envOrigins.length ? envOrigins : [defaultLocal]
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow server-to-server calls (no Origin header), Postman, and same-origin.
     if (!origin) return callback(null, true)
-
     if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
       return callback(null, true)
     }
-
     return callback(new Error('Not allowed by CORS'))
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  optionsSuccessStatus: 204
 }
 
 // Middleware

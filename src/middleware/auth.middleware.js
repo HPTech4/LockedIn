@@ -2,6 +2,8 @@ import { supabaseAdmin } from '../config/supabase.js'
 
 export const protect = async (req, res, next) => {
   try {
+    // Allow preflight requests to pass through without auth
+    if (req.method === 'OPTIONS') return next()
     const authHeader = req.headers.authorization
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
