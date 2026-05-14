@@ -39,10 +39,8 @@ const corsOptions = {
 };
 
 // ✅ Middleware
-app.use(cors(corsOptions));
+app.use(cors(corsOptions))
 
-// 🔥 VERY IMPORTANT (fixes your exact error)
-app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
