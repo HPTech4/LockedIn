@@ -11,35 +11,33 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ✅ Allowed origins (local frontend + optional env)
-const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
-
-// If you later add deployed frontend
-if (process.env.CORS_ORIGIN) {
-  allowedOrigins.push(process.env.CORS_ORIGIN);
-}
+const rawAllowed =
+  process.env.ALLOWED_ORIGINS ||
+  "http://localhost:3000,http://127.0.0.1:5173,http://localhost:5173";
+const allowedOrigins = rawAllowed
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 // ✅ Clean CORS config
-const corsOptions = {
-  origin: (origin, callback) => {
-    console.log("Incoming Origin:", origin); // 🔍 debug
-
-    // Allow requests with no origin (Postman, mobile apps)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // ❗ DO NOT throw error — just block silently
-    return callback(null, false);
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin like curl/postman
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS policy: This origin is not allowed."));
+    },
+    methods: ["POST", "GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
 
 // ✅ Middleware
-app.use(cors(corsOptions))
+
 
 
 app.use(express.json());
@@ -66,6 +64,17 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
+app.options("/send", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // If using credentials, echo the origin and set allow-credentials
+  if (req.headers.origin && req.headers.origin.startsWith("http")) {
+    res.header("Access-Control-Allow-Origin", req.headers.origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
+  return res.sendStatus(204);
+});
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
