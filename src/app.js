@@ -68,10 +68,10 @@ app.options("/send", (req, res) => {
   res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  // If using credentials, echo the origin and set allow-credentials
   if (req.headers.origin && req.headers.origin.startsWith("http")) {
     res.header("Access-Control-Allow-Origin", req.headers.origin);
     res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Credentials", "http://localhost:5173");
   }
   return res.sendStatus(204);
 });
